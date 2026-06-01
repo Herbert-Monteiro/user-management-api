@@ -1,6 +1,7 @@
 package com.herbertmonteiro.usermanagementapi.service;
 import com.herbertmonteiro.usermanagementapi.dto.UserRequestDTO;
 import com.herbertmonteiro.usermanagementapi.dto.UserResponseDTO;
+import com.herbertmonteiro.usermanagementapi.dto.UserUpdateDTO;
 import com.herbertmonteiro.usermanagementapi.entity.User;
 import com.herbertmonteiro.usermanagementapi.enums.Role;
 import com.herbertmonteiro.usermanagementapi.exeception.ResourceNotFoundException;
@@ -12,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -28,8 +28,8 @@ public class UserService {
                 .email(dto.email())
                 .password(passwordEncoder.encode(dto.password()))
                 .role(dto.role() != null ? Role.valueOf(dto.role()) : Role.USER)
-                .birth_Date(dto.birthDate())
-                .created_At(LocalDateTime.now())
+                .birthDate(dto.birthDate())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -49,13 +49,13 @@ public class UserService {
                 .map(this::toResponse);
     }
 
-    public UserResponseDTO updateUser(Long id, UserRequestDTO dto) {
+    public UserResponseDTO updateUser(Long id,UserUpdateDTO dto) {
         User user = findUserById(id);
 
         if (dto.name() != null)      user.setName(dto.name());
         if (dto.cpf() != null)       user.setCpf(dto.cpf());
         if (dto.email() != null)     user.setEmail(dto.email());
-        if (dto.birthDate() != null) user.setBirth_Date(dto.birthDate());
+        if (dto.birthDate() != null) user.setBirthDate(dto.birthDate());
         if (dto.password() != null)  user.setPassword(passwordEncoder.encode(dto.password()));
 
         return toResponse(userRepository.save(user));
@@ -65,14 +65,14 @@ public class UserService {
         return toResponse(findLoggedUser());
     }
 
-    public UserResponseDTO updateLoggedUser(UserRequestDTO dto) {
+    public UserResponseDTO updateLoggedUser(UserUpdateDTO dto) {
         User user = findLoggedUser();
 
 
         if (dto.name() != null)      user.setName(dto.name());
         if (dto.cpf() != null)       user.setCpf(dto.cpf());
         if (dto.email() != null)     user.setEmail(dto.email());
-        if (dto.birthDate() != null) user.setBirth_Date(dto.birthDate());
+        if (dto.birthDate() != null) user.setBirthDate(dto.birthDate());
 
         return toResponse(userRepository.save(user));
     }
@@ -98,8 +98,8 @@ public class UserService {
                 user.getCpf(),
                 user.getEmail(),
                 user.getRole().name(),
-                user.getBirth_Date(),
-                user.getCreated_At()
+                user.getBirthDate(),
+                user.getCreatedAt()
         );
     }
 }

@@ -3,6 +3,7 @@ package com.herbertmonteiro.usermanagementapi.controller;
 import com.herbertmonteiro.usermanagementapi.dto.LoanResponseDTO;
 import com.herbertmonteiro.usermanagementapi.dto.UserRequestDTO;
 import com.herbertmonteiro.usermanagementapi.dto.UserResponseDTO;
+import com.herbertmonteiro.usermanagementapi.dto.UserUpdateDTO;
 import com.herbertmonteiro.usermanagementapi.service.LoanService;
 import com.herbertmonteiro.usermanagementapi.service.UserService;
 import jakarta.validation.Valid;
@@ -44,7 +45,7 @@ public class AdminController {
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> update(
             @PathVariable Long id,
-            @RequestBody UserRequestDTO dto){
+            @RequestBody UserUpdateDTO dto){
                 return ResponseEntity.ok(userService.updateUser(id,dto));
 
             }
@@ -56,7 +57,7 @@ public class AdminController {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(loanService.AllActive(pageable));
     }
-    @GetMapping("/loans/histort")
+    @GetMapping("/loans/history")
     public ResponseEntity<Page<LoanResponseDTO>> allHistory(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10")int size){

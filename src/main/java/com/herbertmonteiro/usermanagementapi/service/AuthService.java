@@ -38,7 +38,7 @@ public class AuthService {
         user.setEmail(dto.email());
         user.setPassword(passwordEncoder.encode(dto.password()));
         user.setRole(Role.USER);
-        user.setBirth_Date(dto.birthDate());
+        user.setBirthDate(dto.birthDate());
 
         userRepository.save(user);
     }

@@ -42,7 +42,9 @@ public class LoanService {
         if (book.getQuantity() <= 0) {
             throw new BookUnavailableException("Book out of stock");
         }
-
+        if(loanRepository.existsByBookIdAndReturnDateIsNull(dto.bookid())){
+            throw new BookUnavailableException("Book already on loan");
+        }
         var loan = Loan.builder()
                 .user(user)
                 .book(book)
@@ -86,7 +88,7 @@ public class LoanService {
 
     public List<LoanResponseDTO> myHistory(){
         var user = findLoggedUser();
-        return loanRepository.findByUserID(user.getId())
+        return loanRepository.findByUserId(user.getId())
                 .stream()
                 .map(this::toResponse)
                 .toList();

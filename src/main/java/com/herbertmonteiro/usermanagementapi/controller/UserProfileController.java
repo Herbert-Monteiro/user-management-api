@@ -1,7 +1,7 @@
 package com.herbertmonteiro.usermanagementapi.controller;
 import com.herbertmonteiro.usermanagementapi.dto.LoanResponseDTO;
-import com.herbertmonteiro.usermanagementapi.dto.UserRequestDTO;
 import com.herbertmonteiro.usermanagementapi.dto.UserResponseDTO;
+import com.herbertmonteiro.usermanagementapi.dto.UserUpdateDTO;
 import com.herbertmonteiro.usermanagementapi.service.LoanService;
 import com.herbertmonteiro.usermanagementapi.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class UserProfileController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<UserResponseDTO>updateMe(@RequestBody UserRequestDTO dto){
+    public ResponseEntity<UserResponseDTO>updateMe(@RequestBody UserUpdateDTO dto){
         return ResponseEntity.ok(userService.updateLoggedUser(dto));
     }
 
