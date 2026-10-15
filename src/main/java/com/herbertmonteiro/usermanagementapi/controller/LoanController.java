@@ -20,12 +20,9 @@ public class LoanController {
     public ResponseEntity<LoanResponseDTO> create(@Valid @RequestBody LoanRequestDTO dto) {
         return ResponseEntity.status(201).body(loanService.create(dto));
     }
+
     @PutMapping("/{id}/return")
-    public ResponseEntity<LoanResponseDTO> returnBook(@PathVariable Long id){
+    public ResponseEntity<LoanResponseDTO> returnBook(@PathVariable Long id) {
         return ResponseEntity.ok(loanService.returnBook(id));
-    }
-    @GetMapping("/active")
-    public ResponseEntity<List<LoanResponseDTO>> listActive(){
-        return ResponseEntity.ok(loanService.listActive());
     }
 }
