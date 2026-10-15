@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,15 +24,15 @@ public class AdminController {
     private final LoanService loanService;
 
     @PostMapping
-    public ResponseEntity<UserResponseDTO> creat(@Valid @RequestBody UserRequestDTO dto){
-        return ResponseEntity.ok(userService.createUser(dto));
+    public ResponseEntity<UserResponseDTO> create(@Valid @RequestBody UserRequestDTO dto){
+        return new ResponseEntity<>(userService.createUser(dto),HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable Long id){
                 userService.deleteUser(id);
-                return ResponseEntity.noContent().build();
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
     @GetMapping
@@ -39,14 +40,14 @@ public class AdminController {
             @RequestParam(defaultValue = "0")int page,
             @RequestParam(defaultValue = "10")int size){
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(userService.theWholeList(pageable));
+        return new ResponseEntity<>(userService.theWholeList(pageable),HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> update(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody UserUpdateDTO dto){
-                return ResponseEntity.ok(userService.updateUser(id,dto));
+                return new ResponseEntity<>(userService.updateUser(id,dto),HttpStatus.OK);
 
             }
 
