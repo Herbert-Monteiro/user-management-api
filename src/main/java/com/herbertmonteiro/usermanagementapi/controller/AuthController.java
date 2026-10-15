@@ -2,6 +2,7 @@ package com.herbertmonteiro.usermanagementapi.controller;
 import com.herbertmonteiro.usermanagementapi.dto.LoginRequestDTO;
 import com.herbertmonteiro.usermanagementapi.dto.LoginResponseDTO;
 import com.herbertmonteiro.usermanagementapi.dto.RegisterRequestDTO;
+import org.springframework.http.ResponseEntity;
 import com.herbertmonteiro.usermanagementapi.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +19,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public String register(@Valid @RequestBody RegisterRequestDTO request){
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request){
         authService.register(request);
-        return "User creat";
+        return ResponseEntity.status(201).body("User created");
     }
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO dto){
