@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface LoanRepository extends  JpaRepository<Loan, Long> {
     List<Loan> findByReturnDateIsNull();
-    boolean existsByBookIdAndReturnDateIsNull(Long bookId);
+    boolean existsByUserIdAndBookIdAndReturnDateIsNull(Long userId,Long bookId);
     List<Loan> findByUserId(Long userId);
     Page<Loan> findByReturnDateIsNull(Pageable pageable);
 }

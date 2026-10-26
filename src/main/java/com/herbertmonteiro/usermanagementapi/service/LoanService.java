@@ -6,11 +6,14 @@ import com.herbertmonteiro.usermanagementapi.entity.Book;
 import com.herbertmonteiro.usermanagementapi.entity.Loan;
 import com.herbertmonteiro.usermanagementapi.entity.User;
 import com.herbertmonteiro.usermanagementapi.exeception.BookUnavailableException;
+import com.herbertmonteiro.usermanagementapi.exeception.ConflictException;
 import com.herbertmonteiro.usermanagementapi.exeception.ResourceNotFoundException;
 import com.herbertmonteiro.usermanagementapi.repository.BookRepository;
 import com.herbertmonteiro.usermanagementapi.repository.LoanRepository;
 import com.herbertmonteiro.usermanagementapi.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import com.herbertmonteiro.usermanagementapi.exeception.ConflictException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,6 +38,9 @@ public class LoanService {
     private static final BigDecimal RATE_PHASE3 = new BigDecimal("0.50");
     private static final BigDecimal FINE_RATE = new BigDecimal("0.01");
 
+    private static final BigDecimal DAILY_RATE = new BigDecimal("2.00");
+
+    @Transactional
     public LoanResponseDTO create(LoanRequestDTO dto){
         var user = findLoggedUser();
         var book = findBook(dto.bookid());
@@ -42,15 +48,16 @@ public class LoanService {
         if (book.getQuantity() <= 0) {
             throw new BookUnavailableException("Book out of stock");
         }
-        if(loanRepository.existsByBookIdAndReturnDateIsNull(dto.bookid())){
-            throw new BookUnavailableException("Book already on loan");
+        if (loanRepository.existsByUserIdAndBookIdAndReturnDateIsNull(user.getId(), book.getId())) {
+            throw new ConflictException("You already have this book on loan");
         }
+
         var loan = Loan.builder()
                 .user(user)
                 .book(book)
                 .loanDate(LocalDate.now())
                 .loanDays(dto.loanDays())
-                .dailyRate(dto.dailyRate())
+                .dailyRate(DAILY_RATE)
                 .build();
         book.setQuantity(book.getQuantity() - 1);
         bookRepository.save(book);
@@ -65,7 +72,7 @@ public class LoanService {
         return userRepository.findByEmail(email)
                 .orElseThrow(()-> new ResourceNotFoundException("User not found"));
     }
-
+    @Transactional
     public LoanResponseDTO returnBook(Long loanId){
         var loan = findLoan(loanId);
 
@@ -164,4 +171,5 @@ public class LoanService {
                 totalWithFine
         );
     }
+
 }
