@@ -59,4 +59,10 @@ public class GlobalExceptionHandler {
                 "errors", errors
         ));
     }
+
+    @ExceptionHandler(ForbinddenException.class)
+    public ResponseEntity<Map<String, Object>> handleFobidden(ForbinddenException ex){
+        return build(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
 }

@@ -7,13 +7,13 @@ import com.herbertmonteiro.usermanagementapi.entity.Loan;
 import com.herbertmonteiro.usermanagementapi.entity.User;
 import com.herbertmonteiro.usermanagementapi.exeception.BookUnavailableException;
 import com.herbertmonteiro.usermanagementapi.exeception.ConflictException;
+import com.herbertmonteiro.usermanagementapi.exeception.ForbinddenException;
 import com.herbertmonteiro.usermanagementapi.exeception.ResourceNotFoundException;
 import com.herbertmonteiro.usermanagementapi.repository.BookRepository;
 import com.herbertmonteiro.usermanagementapi.repository.LoanRepository;
 import com.herbertmonteiro.usermanagementapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import com.herbertmonteiro.usermanagementapi.exeception.ConflictException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -72,9 +72,22 @@ public class LoanService {
         return userRepository.findByEmail(email)
                 .orElseThrow(()-> new ResourceNotFoundException("User not found"));
     }
+
     @Transactional
     public LoanResponseDTO returnBook(Long loanId){
         var loan = findLoan(loanId);
+
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean IsAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!IsAdmin && !loan.getUser().getEmail().equals(auth.getName())) {
+            throw new ForbinddenException("You Can only return your ows ddloans");
+        }
+
+        if (loan.getReturnDate() != null) {
+            throw new ConflictException("Loan already returned");
+        }
 
         loan.setReturnDate(LocalDate.now());
 
@@ -84,6 +97,7 @@ public class LoanService {
 
         loanRepository.save(loan);
         return toResponse(loan);
+
     }
 
     public List<LoanResponseDTO> listActive(){
