@@ -1,6 +1,7 @@
 package com.herbertmonteiro.usermanagementapi.service;
 
 import com.herbertmonteiro.usermanagementapi.entity.Book;
+import com.herbertmonteiro.usermanagementapi.exeception.ConflictException;
 import com.herbertmonteiro.usermanagementapi.exeception.ResourceNotFoundException;
 import com.herbertmonteiro.usermanagementapi.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,9 @@ public class BookService {
     private final BookRepository bookRepository;
 
     public BookResponseDTO create(BookRequestDTO dto) {
+        if (bookRepository.existsByIsbn(dto.isbn())) {
+        throw new ConflictException("ISBN already registered");
+        }
         Book book = Book.builder()
                 .title(dto.title())
                 .author(dto.author())

@@ -28,8 +28,12 @@ public class AuthService {
             throw new InvalidDataException("CPF invalid");
         }
 
-        if (userRepository.findByEmail(dto.email()).isPresent()) {
-            throw new ConflictException("User already exists");
+        if (userRepository.existsByCpf(cleanCpf)){
+            throw new ConflictException("CPF already registered");
+        }
+
+        if (userRepository.existsByEmail(dto.email())) {
+            throw new ConflictException("Email already registered");
         }
 
         User user = new User();

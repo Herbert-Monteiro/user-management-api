@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface BookRepository extends JpaRepository<Book, Long>{
     Page<Book> findAll(Pageable pageable);
     Page<Book> findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(
-            String title, String author, Pageable pageable);}
+            String title, String author, Pageable pageable);
+    boolean existsByIsbn(String isbn);
+}
