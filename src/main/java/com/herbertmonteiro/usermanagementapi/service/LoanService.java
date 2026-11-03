@@ -149,12 +149,12 @@ public class LoanService {
         return totalPrice.multiply(factor).setScale(2, RoundingMode.HALF_UP);
     }
 
-    public Page<LoanResponseDTO> AllHistory(Pageable pageable){
+    public Page<LoanResponseDTO> allHistory(Pageable pageable){
         return loanRepository.findAll(pageable)
                 .map(this::toResponse);
     }
 
-    public Page<LoanResponseDTO> AllActive(Pageable pageable){
+    public Page<LoanResponseDTO> allActive(Pageable pageable){
         return loanRepository.findByReturnDateIsNull(pageable)
                 .map(this::toResponse);
     }
