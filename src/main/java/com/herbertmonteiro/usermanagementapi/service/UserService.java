@@ -30,7 +30,7 @@ public class UserService {
 
         User user = User.builder()
                 .name(dto.name())
-                .cpf(dto.cpf())
+                .cpf(cpf)
                 .email(dto.email())
                 .password(passwordEncoder.encode(dto.password()))
                 .role(parseRole((dto.role())))
@@ -60,7 +60,7 @@ public class UserService {
         checkDuplicates(dto.email(), cpf, user.getId());
 
         if (dto.name() != null) user.setName(dto.name());
-        if (dto.cpf() != null) user.setCpf(dto.cpf());
+        if (cpf != null) user.setCpf(cpf);
         if (dto.email() != null) user.setEmail(dto.email());
         if (dto.birthDate() != null) user.setBirthDate(dto.birthDate());
         if (dto.password() != null) user.setPassword(passwordEncoder.encode(dto.password()));
@@ -79,7 +79,7 @@ public class UserService {
         checkDuplicates(dto.email(), cpf, user.getId());
 
         if (dto.name() != null) user.setName(dto.name());
-        if (dto.cpf() != null) user.setCpf(dto.cpf());
+        if (cpf != null) user.setCpf(cpf);
         if (dto.email() != null) user.setEmail(dto.email());
         if (dto.birthDate() != null) user.setBirthDate(dto.birthDate());
 
