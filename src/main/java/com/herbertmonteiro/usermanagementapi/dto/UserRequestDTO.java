@@ -11,7 +11,7 @@ public record UserRequestDTO (
         String cpf,
 
         @NotBlank(message = "Email is required")
-        @Email(message = "Invalid email")
+        @Email(regexp = ValidationPatterns.EMAIL, message = "Invalid email")
         String email,
 
         @NotBlank(message = "Password is required")
@@ -24,5 +24,11 @@ public record UserRequestDTO (
         @Past(message = "Birth date must be in the past")
         LocalDate birthDate
 
-){}
+){
+        public final class ValidationPatterns {
+                private ValidationPatterns() {}
+                public static final String EMAIL =
+                        "^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$";
+        }
+}
 
