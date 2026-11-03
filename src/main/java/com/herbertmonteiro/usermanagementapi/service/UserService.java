@@ -4,9 +4,9 @@ import com.herbertmonteiro.usermanagementapi.dto.UserResponseDTO;
 import com.herbertmonteiro.usermanagementapi.dto.UserUpdateDTO;
 import com.herbertmonteiro.usermanagementapi.entity.User;
 import com.herbertmonteiro.usermanagementapi.enums.Role;
-import com.herbertmonteiro.usermanagementapi.exeception.ConflictException;
-import com.herbertmonteiro.usermanagementapi.exeception.InvalidDataException;
-import com.herbertmonteiro.usermanagementapi.exeception.ResourceNotFoundException;
+import com.herbertmonteiro.usermanagementapi.exception.ConflictException;
+import com.herbertmonteiro.usermanagementapi.exception.InvalidDataException;
+import com.herbertmonteiro.usermanagementapi.exception.ResourceNotFoundException;
 import com.herbertmonteiro.usermanagementapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Locale;
 
 @RequiredArgsConstructor
 @Service

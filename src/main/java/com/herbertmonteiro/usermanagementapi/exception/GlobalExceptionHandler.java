@@ -1,4 +1,4 @@
-package com.herbertmonteiro.usermanagementapi.exeception;
+package com.herbertmonteiro.usermanagementapi.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -66,13 +66,13 @@ public class GlobalExceptionHandler {
         ));
     }
 
-    @ExceptionHandler(ForbinddenException.class)
-    public ResponseEntity<Map<String, Object>> handleFobidden(ForbinddenException ex){
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String, Object>> handleForbidden(ForbiddenException ex){
         return build(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, Object>> handleDataIntergraty(DataIntegrityViolationException ex){
+    public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex){
         log.warn("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
         return build(HttpStatus.CONFLICT,
                 "Operation violates data integrity (duplicate value or record in use");

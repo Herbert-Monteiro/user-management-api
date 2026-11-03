@@ -1,4 +1,4 @@
-package com.herbertmonteiro.usermanagementapi.exeception;
+package com.herbertmonteiro.usermanagementapi.exception;
 
 public class BookUnavailableException extends RuntimeException {
     public BookUnavailableException(String message) {

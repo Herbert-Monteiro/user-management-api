@@ -5,10 +5,10 @@ import com.herbertmonteiro.usermanagementapi.dto.LoanResponseDTO;
 import com.herbertmonteiro.usermanagementapi.entity.Book;
 import com.herbertmonteiro.usermanagementapi.entity.Loan;
 import com.herbertmonteiro.usermanagementapi.entity.User;
-import com.herbertmonteiro.usermanagementapi.exeception.BookUnavailableException;
-import com.herbertmonteiro.usermanagementapi.exeception.ConflictException;
-import com.herbertmonteiro.usermanagementapi.exeception.ForbinddenException;
-import com.herbertmonteiro.usermanagementapi.exeception.ResourceNotFoundException;
+import com.herbertmonteiro.usermanagementapi.exception.BookUnavailableException;
+import com.herbertmonteiro.usermanagementapi.exception.ConflictException;
+import com.herbertmonteiro.usermanagementapi.exception.ForbiddenException;
+import com.herbertmonteiro.usermanagementapi.exception.ResourceNotFoundException;
 import com.herbertmonteiro.usermanagementapi.repository.BookRepository;
 import com.herbertmonteiro.usermanagementapi.repository.LoanRepository;
 import com.herbertmonteiro.usermanagementapi.repository.UserRepository;
@@ -43,7 +43,7 @@ public class LoanService {
     @Transactional
     public LoanResponseDTO create(LoanRequestDTO dto){
         var user = findLoggedUser();
-        var book = findBook(dto.bookid());
+        var book = findBook(dto.bookId());
 
         if (book.getQuantity() <= 0) {
             throw new BookUnavailableException("Book out of stock");
@@ -82,7 +82,7 @@ public class LoanService {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         if (!IsAdmin && !loan.getUser().getEmail().equals(auth.getName())) {
-            throw new ForbinddenException("You Can only return your ows ddloans");
+            throw new ForbiddenException("You Can only return your ows ddloans");
         }
 
         if (loan.getReturnDate() != null) {

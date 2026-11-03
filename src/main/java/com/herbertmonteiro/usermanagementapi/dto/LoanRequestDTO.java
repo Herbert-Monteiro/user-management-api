@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record LoanRequestDTO(
         @NotNull(message = "Book is required")
-        Long bookid,
+        Long bookId,
 
         @NotNull(message = "Loan days is required")
         @Min(value = 1, message = "Loan days must be at least 1")

@@ -1,8 +1,8 @@
 package com.herbertmonteiro.usermanagementapi.service;
 
 import com.herbertmonteiro.usermanagementapi.entity.Book;
-import com.herbertmonteiro.usermanagementapi.exeception.ConflictException;
-import com.herbertmonteiro.usermanagementapi.exeception.ResourceNotFoundException;
+import com.herbertmonteiro.usermanagementapi.exception.ConflictException;
+import com.herbertmonteiro.usermanagementapi.exception.ResourceNotFoundException;
 import com.herbertmonteiro.usermanagementapi.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

@@ -3,9 +3,9 @@ import com.herbertmonteiro.usermanagementapi.dto.LoginRequestDTO;
 import com.herbertmonteiro.usermanagementapi.dto.RegisterRequestDTO;
 import com.herbertmonteiro.usermanagementapi.entity.User;
 import com.herbertmonteiro.usermanagementapi.enums.Role;
-import com.herbertmonteiro.usermanagementapi.exeception.ConflictException;
-import com.herbertmonteiro.usermanagementapi.exeception.InvalidDataException;
-import com.herbertmonteiro.usermanagementapi.exeception.UnauthorizedException;
+import com.herbertmonteiro.usermanagementapi.exception.ConflictException;
+import com.herbertmonteiro.usermanagementapi.exception.InvalidDataException;
+import com.herbertmonteiro.usermanagementapi.exception.UnauthorizedException;
 import com.herbertmonteiro.usermanagementapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,7 +37,7 @@ public class AuthService {
         }
 
         User user = new User();
-        user.setName(dto.nome());
+        user.setName(dto.name());
         user.setCpf(cleanCpf);
         user.setEmail(dto.email());
         user.setPassword(passwordEncoder.encode(dto.password()));

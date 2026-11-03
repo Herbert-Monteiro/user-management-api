@@ -1,6 +1,5 @@
 package com.herbertmonteiro.usermanagementapi.controller;
 
-import com.herbertmonteiro.usermanagementapi.dto.LoanResponseDTO;
 import com.herbertmonteiro.usermanagementapi.dto.UserRequestDTO;
 import com.herbertmonteiro.usermanagementapi.dto.UserResponseDTO;
 import com.herbertmonteiro.usermanagementapi.dto.UserUpdateDTO;
@@ -36,7 +35,7 @@ public class AdminController {
             }
 
     @GetMapping
-    public ResponseEntity<Page<UserResponseDTO>> ListUser(
+    public ResponseEntity<Page<UserResponseDTO>> listUser(
             @RequestParam(defaultValue = "0")int page,
             @RequestParam(defaultValue = "10")int size){
         Pageable pageable = PageRequest.of(page, size);

@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 public record RegisterRequestDTO (
         @NotBlank(message = "Name is required")
-        String nome,
+        String name,
 
         @NotBlank(message = "CPF is required")
         String cpf,
