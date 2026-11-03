@@ -4,6 +4,7 @@ import com.herbertmonteiro.usermanagementapi.dto.UserResponseDTO;
 import com.herbertmonteiro.usermanagementapi.dto.UserUpdateDTO;
 import com.herbertmonteiro.usermanagementapi.service.LoanService;
 import com.herbertmonteiro.usermanagementapi.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ public class UserProfileController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<UserResponseDTO>updateMe(@RequestBody UserUpdateDTO dto){
+    public ResponseEntity<UserResponseDTO>updateMe(@Valid @RequestBody UserUpdateDTO dto){
         return ResponseEntity.ok(userService.updateLoggedUser(dto));
     }
 

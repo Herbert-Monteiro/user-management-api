@@ -46,24 +46,10 @@ public class AdminController {
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> update(
             @PathVariable("id") Long id,
+            @Valid
             @RequestBody UserUpdateDTO dto){
                 return new ResponseEntity<>(userService.updateUser(id,dto),HttpStatus.OK);
 
             }
-
-    @GetMapping("/loans/active")
-    public ResponseEntity<Page<LoanResponseDTO>> allActive(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(loanService.AllActive(pageable));
-    }
-    @GetMapping("/loans/history")
-    public ResponseEntity<Page<LoanResponseDTO>> allHistory(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10")int size){
-        Pageable pageable= PageRequest.of(page, size);
-        return ResponseEntity.ok(loanService.AllHistory(pageable));
-    }
 
 }
