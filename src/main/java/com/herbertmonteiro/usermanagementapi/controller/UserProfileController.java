@@ -25,6 +25,12 @@ public class UserProfileController {
         return ResponseEntity.ok(userService.getLoggedUser());
     }
 
+    @DeleteMapping("/me/delete")
+    public ResponseEntity<Void>deleteMe(){
+        userService.deleteLoggedUser();
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/me")
     public ResponseEntity<UserResponseDTO>updateMe(@Valid @RequestBody UserUpdateDTO dto){
         return ResponseEntity.ok(userService.updateLoggedUser(dto));
@@ -34,4 +40,5 @@ public class UserProfileController {
     public ResponseEntity<List<LoanResponseDTO>> myHistory(){
         return ResponseEntity.ok(loanService.myHistory());
     }
+
 }

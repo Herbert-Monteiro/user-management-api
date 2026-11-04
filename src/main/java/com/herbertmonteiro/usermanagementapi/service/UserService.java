@@ -7,21 +7,27 @@ import com.herbertmonteiro.usermanagementapi.enums.Role;
 import com.herbertmonteiro.usermanagementapi.exception.ConflictException;
 import com.herbertmonteiro.usermanagementapi.exception.InvalidDataException;
 import com.herbertmonteiro.usermanagementapi.exception.ResourceNotFoundException;
+import com.herbertmonteiro.usermanagementapi.repository.LoanRepository;
 import com.herbertmonteiro.usermanagementapi.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final LoanRepository loanRepository;
 
     public UserResponseDTO createUser(UserRequestDTO dto) {
         String cpf = cleanCpf(dto.cpf());
@@ -40,17 +46,36 @@ public class UserService {
         return toResponse(userRepository.save(user));
     }
 
-    public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("User not found");
-        }
-        userRepository.deleteById(id);
+
+    @Transactional
+    public void deleteUser(Long id){
+        softDelete(findUserById(id));
     }
 
-    public Page<UserResponseDTO> theWholeList(Pageable pageable) {
-        return userRepository.findAll(pageable)
+    @Transactional
+    public void deleteLoggedUser(){
+        softDelete(findLoggedUser());
+    }
+
+    public  Page<UserResponseDTO> theWholeList(Pageable pageable){
+        return userRepository.findByDeletedAtIsNull(pageable)
                 .map(this::toResponse);
     }
+
+    private void softDelete(User user){
+        if (loanRepository.existsByUserIdAndReturnDateIsNull(user.getId())){
+            throw new ConflictException("User has active loans. Return them before deleting the account");
+        }
+
+        user.setName("User delete");
+        user.setEmail("deleted-" + user.getId() + "@deleted.local");
+        user.setCpf("D"+ String.format("%010d", user.getId()));
+        user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+        user.setBirthDate(LocalDate.of(1900,1,1));
+        user.setDeletedAt((LocalDateTime.now()));
+        userRepository.save(user);
+    }
+
 
     public UserResponseDTO updateUser(Long id, UserUpdateDTO dto) {
         User user = findUserById(id);
@@ -87,6 +112,7 @@ public class UserService {
 
     private User findUserById(Long id) {
         return userRepository.findById(id)
+                .filter(u -> u.getDeletedAt() == null)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 

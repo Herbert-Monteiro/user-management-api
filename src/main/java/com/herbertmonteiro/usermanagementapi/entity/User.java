@@ -40,4 +40,6 @@ public class User {
 
     @Column(nullable = false)
     private LocalDate birthDate;
-}
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;}

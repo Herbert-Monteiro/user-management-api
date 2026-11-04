@@ -15,6 +15,7 @@ public interface UserRepository extends JpaRepository<User,Long>{
     boolean existsByCpf(String cpf);
     boolean existsByEmailAndIdNot(String email, Long id);
     boolean existsByCpfAndIdNot(String cpf, Long id);
+    Page<User> findByDeletedAtIsNull (Pageable pageable);
 }
 
 
