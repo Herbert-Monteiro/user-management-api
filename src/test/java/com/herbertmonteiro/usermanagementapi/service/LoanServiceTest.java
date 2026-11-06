@@ -1,5 +1,14 @@
 package com.herbertmonteiro.usermanagementapi.service;
 
+import com.herbertmonteiro.usermanagementapi.dto.LoanRequestDTO;
+import com.herbertmonteiro.usermanagementapi.exception.BookUnavailableException;
+import com.herbertmonteiro.usermanagementapi.exception.ConflictException;
+import com.herbertmonteiro.usermanagementapi.exception.ForbiddenException;
+import org.junit.jupiter.api.AfterEach;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import java.util.Optional;
 import com.herbertmonteiro.usermanagementapi.dto.LoanResponseDTO;
 import com.herbertmonteiro.usermanagementapi.entity.Book;
 import com.herbertmonteiro.usermanagementapi.entity.Loan;
@@ -23,6 +32,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -143,5 +155,135 @@ public class LoanServiceTest {
         assertThat(result.bookId()).isEqualTo(10L);
         assertThat(result.bookTitle()).isEqualTo("Clean Code");
         assertThat(result.dailyRate()).isEqualByComparingTo("2.00");
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void authenticateAs(String email,String role){
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        email,null,List.of(new SimpleGrantedAuthority(role))
+                )
+        );
+    }
+
+    private User userWithEmail(String email){
+        return User.builder().id(1L).name("Herbert").email(email).build();
+    }
+
+    private Book bookWithStock(int quantity){
+        return Book.builder().id(10L).title("Clean Code").quantity(quantity).build();
+    }
+
+    @Test
+    @DisplayName("create: livro sem estoque lança BookUnvailableException e nao salvar nada")
+    void shoulThrowWhenBookOutOfStock(){
+        authenticateAs("herbert@test.com","ROLE_USER");
+        when(userRepository.findByEmail("herbert@test.com"))
+                .thenReturn(Optional.of(userWithEmail("herbert@test.com")));
+        when(bookRepository.findById(10L)).thenReturn(Optional.of(bookWithStock(0)));
+
+        assertThatThrownBy(() -> loanService.create(new LoanRequestDTO(10L,3)))
+                .isInstanceOf(BookUnavailableException.class)
+                .hasMessage("Book out of stock");
+
+        verify(loanRepository, never()).save(any(Loan.class));
+        verify(bookRepository, never()).save(any(Book.class));
+    }
+
+    @Test
+    @DisplayName("create: sucesso decrementa o estoque e salva o empréstimo")
+    void shouldCreateLoanAndDecrementStock(){
+        authenticateAs("herbert@test.com", "ROLE_USER");
+        Book book = bookWithStock(5);
+        when(userRepository.findByEmail("herbert@test.com"))
+                .thenReturn(Optional.of(userWithEmail("herbert@test.com")));
+        when(bookRepository.findById(10L)).thenReturn(Optional.of(book));
+        when(loanRepository.existsByUserIdAndBookIdAndReturnDateIsNull(1L,10L)).thenReturn(false);
+
+        LoanResponseDTO result = loanService.create(new LoanRequestDTO(10L,3));
+
+        assertThat(book.getQuantity()).isEqualTo(4);
+        assertThat(result.userId()).isEqualTo(1L);
+        assertThat(result.bookId()).isEqualTo(10L);
+        assertThat(result.loanDays()).isEqualTo(3);
+        assertThat(result.dailyRate()).isEqualByComparingTo("2.00");
+        assertThat(result.returnDate()).isNull();
+        assertThat(result.totalPrice()).isEqualByComparingTo("6.00");
+        verify(bookRepository).save(book);
+        verify(loanRepository).save(any(Loan.class));
+    }
+
+    @Test
+    @DisplayName("returnBook: empréstimo já devolvido lança ConflictException")
+    void shouldThrowWhenLoanAlreadyReturned() {
+        authenticateAs("herbert@test.com", "ROLE_USER");
+        Loan loan = buildLoan(3, LOAN_DATE, LOAN_DATE.plusDays(2));
+        loan.setUser(userWithEmail("herbert@test.com"));
+        when(loanRepository.findById(100L)).thenReturn(Optional.of(loan));
+
+        assertThatThrownBy(() -> loanService.returnBook(100L))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("Loan already returned");
+
+        verify(bookRepository, never()).save(any(Book.class));
+        verify(loanRepository, never()).save(any(Loan.class));
+    }
+
+    @Test
+    @DisplayName("returnBook: usuário comum não pode devolver empréstimo de outro")
+    void shouldThrowWhenReturningAnotherUsersLoan() {
+        authenticateAs("outro@test.com", "ROLE_USER");
+        Loan loan = buildLoan(3, LOAN_DATE, null);
+        loan.setUser(userWithEmail("herbert@test.com"));
+        when(loanRepository.findById(100L)).thenReturn(Optional.of(loan));
+
+        assertThatThrownBy(() -> loanService.returnBook(100L))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("You can only return your own loans");
+
+        assertThat(loan.getReturnDate()).isNull();
+        verify(bookRepository, never()).save(any(Book.class));
+        verify(loanRepository, never()).save(any(Loan.class));
+    }
+
+    @Test
+    @DisplayName("returnBook: dono devolve, registra a data e repõe o estoque")
+    void shouldReturnLoanAndRestoreStock() {
+        authenticateAs("herbert@test.com", "ROLE_USER");
+        Book book = bookWithStock(2);
+        Loan loan = buildLoan(3, LOAN_DATE, null);
+        loan.setUser(userWithEmail("herbert@test.com"));
+        loan.setBook(book);
+        when(loanRepository.findById(100L)).thenReturn(Optional.of(loan));
+
+        LoanResponseDTO result = loanService.returnBook(100L);
+
+        assertThat(loan.getReturnDate()).isEqualTo(LocalDate.now());
+        assertThat(result.returnDate()).isEqualTo(LocalDate.now());
+        assertThat(book.getQuantity()).isEqualTo(3);
+        verify(bookRepository).save(book);
+        verify(loanRepository).save(loan);
+    }
+
+    @Test
+    @DisplayName("returnBook: ADMIN pode devolver empréstimo de outro usuário")
+    void shouldAllowAdminToReturnAnotherUsersLoan() {
+        authenticateAs("admin@test.com", "ROLE_ADMIN");
+        Book book = bookWithStock(0);
+        Loan loan = buildLoan(3, LOAN_DATE, null);
+        loan.setUser(userWithEmail("herbert@test.com"));
+        loan.setBook(book);
+        when(loanRepository.findById(100L)).thenReturn(Optional.of(loan));
+
+        loanService.returnBook(100L);
+
+        assertThat(loan.getReturnDate()).isEqualTo(LocalDate.now());
+        assertThat(book.getQuantity()).isEqualTo(1);
+        verify(bookRepository).save(book);
+        verify(loanRepository).save(loan);
     }
 }
