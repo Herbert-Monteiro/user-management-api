@@ -40,7 +40,6 @@ public class UserService {
                 .password(passwordEncoder.encode(dto.password()))
                 .role(parseRole((dto.role())))
                 .birthDate(dto.birthDate())
-                .createdAt(LocalDateTime.now())
                 .build();
 
         return toResponse(userRepository.save(user));
@@ -67,7 +66,7 @@ public class UserService {
             throw new ConflictException("User has active loans. Return them before deleting the account");
         }
 
-        user.setName("User delete");
+        user.setName("User deleted");
         user.setEmail("deleted-" + user.getId() + "@deleted.local");
         user.setCpf("D"+ String.format("%010d", user.getId()));
         user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));

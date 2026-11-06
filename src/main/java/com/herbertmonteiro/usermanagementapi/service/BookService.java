@@ -12,7 +12,6 @@ import com.herbertmonteiro.usermanagementapi.dto.BookRequestDTO;
 import com.herbertmonteiro.usermanagementapi.dto.BookResponseDTO;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -54,13 +53,6 @@ public class BookService {
         return toResponse(findBook(id));
     }
 
-    public List<BookResponseDTO> list() {
-        return bookRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
-
-    }
 
     public void deleteBook(Long id) {
         if (!bookRepository.existsById(id)) {

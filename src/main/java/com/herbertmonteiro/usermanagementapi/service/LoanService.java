@@ -78,10 +78,10 @@ public class LoanService {
         var loan = findLoan(loanId);
 
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean IsAdmin = auth.getAuthorities().stream()
+        boolean isAdmin = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        if (!IsAdmin && !loan.getUser().getEmail().equals(auth.getName())) {
+        if (!isAdmin && !loan.getUser().getEmail().equals(auth.getName())) {
             throw new ForbiddenException("You can only return your own loans");
         }
 
@@ -98,13 +98,6 @@ public class LoanService {
         loanRepository.save(loan);
         return toResponse(loan);
 
-    }
-
-    public List<LoanResponseDTO> listActive(){
-        return loanRepository.findByReturnDateIsNull()
-                .stream()
-                .map(this::toResponse)
-                .toList();
     }
 
     public List<LoanResponseDTO> myHistory(){

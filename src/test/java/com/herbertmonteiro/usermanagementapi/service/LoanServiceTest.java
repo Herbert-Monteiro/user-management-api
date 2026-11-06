@@ -101,7 +101,7 @@ public class LoanServiceTest {
     }
 
     @Test
-    @DisplayName("Devolvido eatamente no: sem multa")
+    @DisplayName("Devolvido antes do prazo: sem multa")
     void  shouldNotApplyFineWhenReturnedEarly(){
         Loan loan = buildLoan(5, LOAN_DATE,LOAN_DATE.plusDays(2));
 

@@ -12,7 +12,7 @@ public record UserUpdateDTO(
 
         String cpf,
 
-        @Email(regexp = ValidationPatterns.EMAIL, message = "Invalid email")
+        @Email(regexp = ValidationPatternsDTO.EMAIL, message = "Invalid email")
         String email,
 
         @Size(min = 6, message = "Password must be at least 6 characters")
@@ -20,9 +20,4 @@ public record UserUpdateDTO(
 
         @Past(message = "Birth date must be in the past")
         LocalDate birthDate
-) {
-        public final class ValidationPatterns {
-        private ValidationPatterns() {}
-        public static final String EMAIL =
-                "^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$";
-}}
+) {}
