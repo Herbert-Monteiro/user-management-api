@@ -82,7 +82,7 @@ public class LoanService {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         if (!IsAdmin && !loan.getUser().getEmail().equals(auth.getName())) {
-            throw new ForbiddenException("You Can only return your ows ddloans");
+            throw new ForbiddenException("You can only return your own loans");
         }
 
         if (loan.getReturnDate() != null) {
