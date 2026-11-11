@@ -292,6 +292,15 @@ User created
 
 ---
 
+## 🚧 Melhorias futuras
+
+- Frontend (próxima etapa do projeto)
+- Migrações com Flyway no lugar do `schema.sql` manual
+- Controle de concorrência no estoque (lock otimista com `@Version` ou lock pessimista), para evitar que empréstimos simultâneos ultrapassem a quantidade disponível
+- Limite máximo para o parâmetro `size` da paginação
+- `AuthenticationEntryPoint` customizado para retornar 401 (hoje requisições sem token retornam 403)
+- Testes de integração para os endpoints de livros e empréstimos
+
 ## 📸 Swagger
 
 A documentação interativa fica em `http://localhost:8080/swagger-ui/index.html`.
