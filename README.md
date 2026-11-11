@@ -24,6 +24,7 @@ Projeto de portfólio. O frontend será desenvolvido em uma próxima etapa.
 - springdoc-openapi (Swagger UI)
 - Lombok
 - Gradle (wrapper incluso)
+- JUnit 5, Mockito e H2 (testes)
 
 ## Pré-requisitos
 
@@ -86,6 +87,31 @@ Não é preciso instalar o Gradle, o projeto usa o wrapper (`gradlew`).
    No Windows: `gradlew.bat bootRun`
 
 6. Acesse o Swagger UI em: http://localhost:8080/swagger-ui/index.html
+
+### Criando o primeiro ADMIN
+
+O cadastro público cria apenas usuários com role USER. Para promover o primeiro administrador, registre-se normalmente e execute no banco:
+
+```sql
+UPDATE users SET role = 'ADMIN' WHERE email = 'seu@email.com';
+```
+
+Depois, faça login de novo para gerar um token com a nova role.
+
+## 🧪 Testes
+
+```bash
+./gradlew test
+```
+
+No Windows: `gradlew.bat test`
+
+Os testes **não precisam de MySQL**: usam H2 em memória, configurado em `src/test/resources/application.properties`.
+
+Cobertura atual:
+
+- `LoanServiceTest` (JUnit 5 + Mockito + AssertJ): preço por faixas de dias, multa composta, criação de empréstimo com baixa de estoque, devolução com reposição de estoque e regras de permissão (dono x outro usuário x ADMIN)
+- `AuthFlowIntegrationTest`: rota protegida sem token é barrada; cadastro, login e acesso com o token
 
 ## 📡 Endpoints
 
@@ -182,7 +208,7 @@ User created
 }
 ```
 
-**200 OK**
+**201 Created**
 ```json
 {
   "id": 1,
@@ -259,8 +285,8 @@ User created
 | Status | Quando acontece |
 |--------|-----------------|
 | 400 | Campos inválidos ou JSON malformado |
-| 401 | E-mail ou senha incorretos |
-| 403 | Sem permissão (ex.: devolver empréstimo de outro usuário) |
+| 401 | E-mail ou senha incorretos no login |
+| 403 | Sem permissão (ex.: devolver empréstimo de outro usuário) ou requisição sem token, com token inválido ou expirado |
 | 404 | Livro, usuário ou empréstimo não encontrado |
 | 409 | Livro sem estoque, empréstimo duplicado, e-mail/CPF/ISBN já cadastrado |
 

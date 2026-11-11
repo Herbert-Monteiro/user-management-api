@@ -21,7 +21,7 @@ public class BookController {
 
     @PostMapping("/admin/books")
     public ResponseEntity<BookResponseDTO> create(@Valid @RequestBody BookRequestDTO dto){
-        return ResponseEntity.ok(bookService.create(dto));
+        return ResponseEntity.status(201).body(bookService.create(dto));
     }
 
     @DeleteMapping("/admin/books/{id}")
