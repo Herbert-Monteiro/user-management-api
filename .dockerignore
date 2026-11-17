@@ -1,0 +1,11 @@
+.git
+.gradle
+.idea
+build
+bin
+out
+docs
+database
+.env
+*.md
+src/main/resources/application.properties
