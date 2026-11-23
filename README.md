@@ -25,6 +25,49 @@ Projeto de portfólio. O frontend será desenvolvido em uma próxima etapa.
 - Lombok
 - Gradle (wrapper incluso)
 - JUnit 5, Mockito e H2 (testes)
+- Docker e Docker Compose
+
+## 🐳 Rode com um comando
+
+Pré-requisito: [Docker](https://docs.docker.com/get-docker/) com Docker Compose. Não precisa instalar JDK nem MySQL.
+
+```bash
+git clone https://github.com/Herbert-Monteiro/user-management-api.git
+cd user-management-api
+docker compose up --build
+```
+
+O compose sobe o MySQL (já criando as tabelas com `database/schema.sql`) e depois a API. Quando aparecer `Started UserManagementApiApplication` no log, acesse o Swagger: http://localhost:8080/swagger-ui/index.html
+
+> Na primeira vez o download das imagens e o build podem levar alguns minutos. Nas próximas é bem mais rápido.
+
+O banco começa **vazio**. Registre um usuário em `POST /auth/register` para começar.
+
+Comandos úteis:
+
+| Comando | O que faz |
+|---|---|
+| `docker compose up` | Sobe de novo (sem rebuild) |
+| `docker compose up --build` | Reconstrói a imagem depois de mudar o código |
+| `docker compose logs -f api` | Acompanha os logs da API |
+| `docker compose down` | Para tudo (os dados continuam no volume) |
+| `docker compose down -v` | Para tudo **e apaga o banco** |
+
+As senhas e o segredo do JWT têm valores padrão só para desenvolvimento. Para trocá-los, crie um `.env` na raiz (veja o `.env.example`):
+
+```bash
+cp .env.example .env
+```
+
+### Criando o primeiro ADMIN no Docker
+
+Registre-se normalmente e depois rode (troque `root123` pela senha do seu `.env`, se tiver mudado):
+
+```bash
+docker compose exec db mysql -uroot -proot123 user_management_api -e "UPDATE users SET role='ADMIN' WHERE email='seu@email.com';"
+```
+
+Depois faça login de novo para gerar um token com a nova role.
 
 ## Pré-requisitos
 
@@ -34,7 +77,7 @@ Projeto de portfólio. O frontend será desenvolvido em uma próxima etapa.
 
 Não é preciso instalar o Gradle, o projeto usa o wrapper (`gradlew`).
 
-## Como rodar
+## Como rodar sem Docker (manual)
 
 1. Clone o repositório:
 
@@ -139,7 +182,7 @@ Autenticação via **JWT**: faça login em `/auth/login` e envie o token no head
 |--------|------|--------|-----------|---------|
 | GET | `/books?search=&page=0&size=10` | USER, ADMIN | Lista livros paginados, com busca por título ou autor | 200 |
 | GET | `/books/{id}` | USER, ADMIN | Busca livro por ID | 200 |
-| POST | `/admin/books` | ADMIN | Cadastra livro | 200 |
+| POST | `/admin/books` | ADMIN | Cadastra livro | 201 |
 | DELETE | `/admin/books/{id}` | ADMIN | Remove livro | 204 |
 
 ### Empréstimos

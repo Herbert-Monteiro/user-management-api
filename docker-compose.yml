@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mysql:8.4
+    container_name: library-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: user_management_api
+      MYSQL_USER: library
+      MYSQL_PASSWORD: ${DB_PASSWORD:-library123}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root123}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  api:
+    build: .
+    container_name: library-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/user_management_api?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: library
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-library123}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_SHOW_SQL: "false"
+      API_SECURITY_TOKEN_SECRET: ${JWT_SECRET:-dev-only-secret-change-me-at-least-32-chars}
+      API_SECURITY_TOKEN_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+
+volumes:
+  db_data:
