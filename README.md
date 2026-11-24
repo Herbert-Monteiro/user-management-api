@@ -16,6 +16,7 @@ Projeto de portfólio. O frontend será desenvolvido em uma próxima etapa.
 - Paginação nas listagens
 - Tratamento global de exceções
 - Documentação interativa com Swagger/OpenAPI
+- Migrations de banco versionadas com Flyway
 
 ## Stack
 
@@ -28,6 +29,7 @@ Projeto de portfólio. O frontend será desenvolvido em uma próxima etapa.
 - Gradle (wrapper incluso)
 - JUnit 5, Mockito e H2 (testes)
 - Docker e Docker Compose
+- Flyway (migrations)
 
 ## 🐳 Rode com um comando
 
@@ -39,7 +41,7 @@ cd user-management-api
 docker compose up --build
 ```
 
-O compose sobe o MySQL (já criando as tabelas com `database/schema.sql`) e depois a API. Quando aparecer `Started UserManagementApiApplication` no log, acesse o Swagger: http://localhost:8080/swagger-ui/index.html
+O compose sobe o MySQL e depois a API, que cria as tabelas sozinha através das migrations do Flyway. Quando aparecer `Started UserManagementApiApplication` no log, acesse o Swagger: http://localhost:8080/swagger-ui/index.html
 
 > Na primeira vez o download das imagens e o build podem levar alguns minutos. Nas próximas é bem mais rápido.
 
@@ -88,18 +90,15 @@ Não é preciso instalar o Gradle, o projeto usa o wrapper (`gradlew`).
    cd user-management-api
    ```
 
-2. Crie o banco de dados e as tabelas no MySQL:
+2. Crie o banco de dados no MySQL (vazio):
 
    ```sql
    CREATE DATABASE user_management_api;
    ```
 
-   Depois execute o script `database/schema.sql` nesse banco:
+   As tabelas são criadas automaticamente pelo Flyway quando a aplicação sobe.
 
-   ```bash
-   mysql -u seu_usuario -p user_management_api < database/schema.sql
-   ```
-
+   
 3. Crie o arquivo de configuração a partir do exemplo:
 
    ```bash
@@ -151,13 +150,28 @@ Depois, faça login de novo para gerar um token com a nova role.
 
 No Windows: `gradlew.bat test`
 
-Os testes **não precisam de MySQL**: usam H2 em memória, configurado em `src/test/resources/application.properties`.
+Os testes **não precisam de MySQL**: usam H2 em memória, configurado em `src/test/resources/application.properties`. 
 
+O Flyway fica desativado nos testes (as migrations usam sintaxe de MySQL), e o Hibernate cria as tabelas no H2.
 Cobertura atual:
 
 - `LoanServiceTest` (JUnit 5 + Mockito + AssertJ): preço por faixas de dias, multa composta, criação de empréstimo com baixa de estoque, devolução com reposição de estoque e regras de permissão (dono x outro usuário x ADMIN)
 - `AuthFlowIntegrationTest`: rota protegida sem token é barrada; cadastro, login e acesso com o token
 
+## 🗄️ Migrations (Flyway)
+
+O schema do banco é versionado com Flyway. Os scripts ficam em `src/main/resources/db/migration` e são aplicados automaticamente quando a aplicação sobe. O histórico fica na tabela `flyway_schema_history`.
+
+| Arquivo | O que faz |
+|---|---|
+| `V1__create_tables.sql` | Cria as tabelas `users`, `books` e `loans` |
+| `V2__add_loan_indexes.sql` | Cria índices em `loans` para as consultas por usuário e por devolução |
+
+Regras:
+
+- Nome no formato `V<número>__<descrição>.sql` (dois underscores)
+- **Nunca edite uma migration já aplicada** (o Flyway valida o checksum e a aplicação não sobe). Para mudar o schema, crie uma nova versão (`V3__...`)
+- O `spring.jpa.hibernate.ddl-auto` fica em `validate`: o Hibernate só confere se as entidades batem com o schema
 ## 📡 Endpoints
 
 Autenticação via **JWT**: faça login em `/auth/login` e envie o token no header `Authorization: Bearer <token>`.
