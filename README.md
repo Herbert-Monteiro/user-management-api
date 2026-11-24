@@ -1,5 +1,7 @@
 # Library API
 
+![CI](https://github.com/Herbert-Monteiro/user-management-api/actions/workflows/ci.yml/badge.svg)
+
 API REST de gerenciamento de biblioteca: cadastro de usuários e livros, empréstimos com cálculo de preço e multa por atraso, autenticação JWT e controle de acesso por perfil (ADMIN/USER).
 
 Projeto de portfólio. O frontend será desenvolvido em uma próxima etapa.
