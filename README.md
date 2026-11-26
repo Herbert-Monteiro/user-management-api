@@ -45,7 +45,7 @@ O compose sobe o MySQL e depois a API, que cria as tabelas sozinha através das 
 
 > Na primeira vez o download das imagens e o build podem levar alguns minutos. Nas próximas é bem mais rápido.
 
-O banco começa **vazio**. Registre um usuário em `POST /auth/register` para começar.
+O banco já vem com **50 livros de exemplo** (migration `V3`), então basta registrar um usuário em `POST /auth/register`, fazer login e começar a testar os empréstimos.
 
 Comandos úteis:
 
@@ -141,6 +141,20 @@ UPDATE users SET role = 'ADMIN' WHERE email = 'seu@email.com';
 ```
 
 Depois, faça login de novo para gerar um token com a nova role.
+## ⚙️ Configuração por variáveis de ambiente (produção)
+
+Em produção, nada é lido de arquivo: tudo vem de variáveis de ambiente. O perfil `prod` (`application-prod.properties`) liga o Flyway, usa `ddl-auto=validate` e lê a porta da variável `PORT`.
+
+| Variável | Descrição |
+|---|---|
+| `SPRING_PROFILES_ACTIVE` | `prod` para ativar o perfil de produção |
+| `PORT` | Porta HTTP (injetada pela plataforma; padrão 8080) |
+| `SPRING_DATASOURCE_URL` | `jdbc:mysql://HOST:PORTA/NOME_DO_BANCO` |
+| `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD` | Credenciais do banco |
+| `API_SECURITY_TOKEN_SECRET` | Segredo do JWT (mínimo 32 caracteres) |
+| `API_SECURITY_TOKEN_EXPIRATION` | Validade do token em ms |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Se definidas, criam um ADMIN de demonstração na primeira subida (só no perfil `prod`) |
+| `APP_CORS_ALLOWED_ORIGINS` | Origens permitidas para o frontend, separadas por vírgula (padrão: `localhost:5173` e `localhost:3000`) |
 
 ## 🧪 Testes
 
@@ -166,6 +180,7 @@ O schema do banco é versionado com Flyway. Os scripts ficam em `src/main/resour
 |---|---|
 | `V1__create_tables.sql` | Cria as tabelas `users`, `books` e `loans` |
 | `V2__add_loan_indexes.sql` | Cria índices em `loans` para as consultas por usuário e por devolução |
+| `V3__seed_books.sql` | Insere 50 livros de exemplo (títulos e autores reais, ISBNs fictícios) |
 
 Regras:
 
@@ -200,6 +215,9 @@ Autenticação via **JWT**: faça login em `/auth/login` e envie o token no head
 | GET | `/books/{id}` | USER, ADMIN | Busca livro por ID | 200 |
 | POST | `/admin/books` | ADMIN | Cadastra livro | 201 |
 | DELETE | `/admin/books/{id}` | ADMIN | Remove livro | 204 |
+
+> Nas listagens paginadas, o parâmetro `size` é limitado a **50** por página (valores maiores são reduzidos para 50).
+
 
 ### Empréstimos
 
@@ -344,9 +362,8 @@ User created
 | Status | Quando acontece |
 |--------|-----------------|
 | 400 | Campos inválidos ou JSON malformado |
-| 401 | E-mail ou senha incorretos no login |
-| 403 | Sem permissão (ex.: devolver empréstimo de outro usuário) ou requisição sem token, com token inválido ou expirado |
-| 404 | Livro, usuário ou empréstimo não encontrado |
+| 401 | E-mail ou senha incorretos no login, ou requisição sem token, com token inválido ou expirado |
+| 403 | Sem permissão (ex.: devolver empréstimo de outro usuário ou USER acessando rota `/admin`) || 404 | Livro, usuário ou empréstimo não encontrado |
 | 409 | Livro sem estoque, empréstimo duplicado, e-mail/CPF/ISBN já cadastrado |
 
 ---
@@ -354,10 +371,8 @@ User created
 ## 🚧 Melhorias futuras
 
 - Frontend (próxima etapa do projeto)
-- Migrações com Flyway no lugar do `schema.sql` manual
+
 - Controle de concorrência no estoque (lock otimista com `@Version` ou lock pessimista), para evitar que empréstimos simultâneos ultrapassem a quantidade disponível
-- Limite máximo para o parâmetro `size` da paginação
-- `AuthenticationEntryPoint` customizado para retornar 401 (hoje requisições sem token retornam 403)
 - Testes de integração para os endpoints de livros e empréstimos
 
 ## 📸 Swagger
