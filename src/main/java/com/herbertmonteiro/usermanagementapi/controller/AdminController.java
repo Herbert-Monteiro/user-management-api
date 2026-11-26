@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
     private final UserService userService;
-    private final LoanService loanService;
 
     @PostMapping
     public ResponseEntity<UserResponseDTO> create(@Valid @RequestBody UserRequestDTO dto){
@@ -38,7 +37,7 @@ public class AdminController {
     public ResponseEntity<Page<UserResponseDTO>> listUser(
             @RequestParam(defaultValue = "0")int page,
             @RequestParam(defaultValue = "10")int size){
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50));
         return new ResponseEntity<>(userService.theWholeList(pageable),HttpStatus.OK);
     }
 
