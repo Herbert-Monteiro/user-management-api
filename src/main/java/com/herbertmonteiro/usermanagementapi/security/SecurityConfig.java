@@ -1,6 +1,7 @@
 package com.herbertmonteiro.usermanagementapi.security;
 import com.herbertmonteiro.usermanagementapi.service.JWTService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -19,6 +20,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JWTService jwtService;
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
@@ -35,9 +37,14 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
 
+                .cors(Customizer.withDefaults())
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(
